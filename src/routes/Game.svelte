@@ -265,8 +265,20 @@
 		}
 	}
 
+    async function initializeServer(playerId: string) {
+        await fetch('/api/game', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ playerId })
+        });
+        return playerId as string;
+    }
+        
 
 	class Game {
+        playerId: string;
 		player: Player;
 		computer: Player;
 		difficulty: number;
@@ -275,6 +287,8 @@
 		isPaused: boolean;
 		currentWord: string;
 		constructor() {
+            this.playerId = Math.random().toString(36).substring(7);
+            this.initialize();
 			this.player = new Player(new Castle(50, canvas.height - 150, '#8B4513', 100, true));
 			this.computer = new Player(
 				new Castle(canvas.width - 130, canvas.height - 150, '#4682B4', 100, false),
@@ -293,6 +307,10 @@
 			this.isPaused = false;
 			this.currentWord = '';
 		}
+
+        async initialize() {
+        this.playerId = await initializeServer(this.playerId);
+    }
 
 		startSpellingQuiz() {
 			this.isPaused = true;

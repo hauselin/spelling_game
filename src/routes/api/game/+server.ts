@@ -24,6 +24,8 @@ function initializeWordDict(): Record<string, number> {
 
 export const POST: RequestHandler = async ({ request }) => {
     const { playerId } = await request.json();
+    console.log('The following playerId was received:', playerId);
+
 
     // Create a new game session
     const newSession: GameSession = {
@@ -33,6 +35,8 @@ export const POST: RequestHandler = async ({ request }) => {
         correctWords: initializeWordDict(),
         incorrectWords: initializeWordDict()
     };
+
+    console.log('The following newSession was created:', newSession);
 
     gameSessions[playerId] = newSession;
 
