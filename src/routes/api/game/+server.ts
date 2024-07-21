@@ -9,7 +9,7 @@ let gameSessions: Record<string, GameSession> = {};
 interface GameSession {
     playerId: string;
     score: number;
-    meatCount: number;
+    totalMeatCount: number;
     correctWords: Record<string, number>;
     incorrectWords: Record<string, number>;
 }
@@ -31,7 +31,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const newSession: GameSession = {
         playerId,
         score: 0,
-        meatCount: 0,
+        totalMeatCount: 0,
         correctWords: initializeWordDict(),
         incorrectWords: initializeWordDict()
     };
@@ -45,7 +45,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
 
 export const PUT: RequestHandler = async ({ request }) => {
-    const { playerId, score, meatCount, word, isCorrect } = await request.json();
+    const { playerId, score, additionalMeatCount, word, isCorrect } = await request.json();
+
+    console.log('The following playerId was received:', playerId);
+    console.log('The following score was received:', score);
+    console.log('The following meatCount was received:', additionalMeatCount);
+    console.log('The following word was received:', word);
+    console.log('The following isCorrect was received:', isCorrect);
 
     if (!gameSessions[playerId]) {
         return json({ error: 'Game session not found' }, { status: 404 });
@@ -54,12 +60,24 @@ export const PUT: RequestHandler = async ({ request }) => {
     // Update the game session
     const session = gameSessions[playerId];
     session.score += score;
-    session.meatCount += meatCount;
+    session.totalMeatCount += additionalMeatCount;
+    console.log('The following session.score was updated:', session.score);
+    console.log('The following session.totalMeatCount was updated:', session.totalMeatCount)
     if (isCorrect) {
-        session.correctWords[word] = (session.correctWords[word] || 0) + 1;
+        if (session.correctWords[word] || session.correctWords[word] === 0) {
+            session.correctWords[word] = (session.correctWords[word] || 0) + 1;
+        };
+        console.log('The following session.correctWords[word] was updated:', word);
+        console.log('The following session.correctWords[word] count:', session.correctWords[word]);
     } else {
-        session.incorrectWords[word] = (session.incorrectWords[word] || 0) + 1;
+        if (session.incorrectWords[word] || session.incorrectWords[word] === 0) {
+            session.incorrectWords[word] = (session.incorrectWords[word] || 0) + 1;
+        };
+        console.log('The following session.incorrectWords[word] was updated:', word);
+        console.log('The following session.incorrectWords[word] count:', session.incorrectWords[word]);
     }
+
+    console.log('The correct words are:', session.correctWords);
 
     return json({ message: 'Game session updated', session });
 };

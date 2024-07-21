@@ -265,7 +265,7 @@
 		}
 	}
 
-    async function initializeServer(playerId: string) {
+    async function initializeServer(playerId: string) {   // TODO: Update function so that it receives the return from the server
         await fetch('/api/game', {
             method: 'POST',
             headers: {
@@ -364,15 +364,33 @@
 			if (userSpelling === this.currentWord) {
 				this.player.meat += 20;
 				updateMeatCount(this.player.meat);
+                this.sendResultToServer(0, 20, this.currentWord, true);
 				//alert('Correct! You earned 20 meat.');
 			} else {
 				alert(`Sorry, that's incorrect. The correct spelling is: ${this.currentWord}`);
+                this.sendResultToServer(0, 0, this.currentWord, false);
 			}
 
 			// Remove the quiz container and unpause the game
 			document.body.removeChild(document.getElementById('quizContainer') as HTMLElement);
 			this.isPaused = false;
 		}
+
+        async sendResultToServer(score: number, meatCount: number, word: string, isCorrect: boolean) {
+            await fetch('/api/game', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    playerId: this.playerId,
+                    score: score, 
+                    additionalMeatCount: meatCount,
+                    word,
+                    isCorrect
+                 })
+            });
+        }
 
 		createUnitButtons() {
 			this.unitTypes.forEach((unit, index) => {
@@ -464,6 +482,7 @@
 				message = `Game Over! The computer wins.\nYour score: ${score}\n`;
 			}
 
+            await this.sendResultToServer(score, 0, 'adasds', false);
 			alert(message);
 
 			// Reset the game
